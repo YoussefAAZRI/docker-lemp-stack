@@ -1,0 +1,4 @@
+mysql/*
+!mysql/README.md
+nginx/logs/*
+nginx/logs/README.md

@@ -1,0 +1,111 @@
+version: '3'
+services:
+  php:
+    build:
+      context: ./php7-fpm/
+      dockerfile: Dockerfile
+    image: sef/php
+    container_name: php
+    restart: unless-stopped
+    volumes:
+        - ./apps/:/var/www
+        - ./php7-fpm/conf/php7-fpm.conf:/etc/php7/php-fpm.conf
+        # - ./php7-fpm/conf/cron/cron-ac:/etc/cron.d/cron-ac
+    links:
+        - db
+    ports:
+        - 9000:9000
+  web:
+    image: nginx:latest
+    ports:
+        - "80:80"
+        - "443:443"
+    links:
+        - php
+        - db
+    volumes:
+        - ./apps/:/var/www
+        - ./nginx/conf.d/:/etc/nginx/conf.d/
+        - ./nginx/logs/:/var/log/nginx/
+  db:
+    image: mariadb
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+        - ./mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+  # elasticsearch:
+  #   image: elasticsearch
+  #   ports:
+  #       - "9200:9200"
+  #       - "9300:9300"
+  #   volumes:
+  #     - ./elasticsearch:/usr/share/elasticsearch/data
+  #   restart: unless-stopped
+# webserver
+  # nginx:
+  #   image: nginx:latest
+  #   ports:
+  #     - "80:80"
+     # - "443:443"
+    # volumes:
+    #  # app
+    #   - ./apps/:/var/www
+    #   - ./nginx/conf.d/:/etc/nginx/conf.d/
+    #   - ./nginx/logs/:/var/log/nginx/
+     # - ./app/src:/var/wwwhtml
+     # # nginx configs
+     # - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+     # - ./nginx/conf.d/:/etc/nginx/conf.d/:ro
+     # certificates
+     # - ./nginx/ca/server.crt/:/etc/nginx/server.crt:ro
+     # - ./nginx/ca/server.key/:/etc/nginx/server.key:ro
+    # links:
+    #   - fpm:php
+    #   - db
+  # php-fpm
+  # fpm:
+  #   build: ./php7-fpm
+  #   ports:
+  #     - "9000:9000"
+  #   volumes:
+  #     - ./apps/:/var/www
+  #   working_dir: /var/www
+      # - ./php7-fpm/conf/php7-fpm.conf:/etc/php7/php-fpm.conf
+
+     # Your php.ini
+     # - ./php-fpm/php.ini-production:/usr/local/etc/php/php.ini:ro
+   # environment:
+     # Set your APP env variables here:
+     # - APP_KEY=
+     # - DB_HOST=
+     # - DB_DATABASE=
+     # - DB_USERNAME=
+     # - DB_PASSWORD=
+  # database
+  # db:
+  #   image: mariadb
+  #   restart: always
+  #   ports:
+  #     - 3306:3306
+  #   volumes:
+  #       - ./mysql:/var/lib/mysql
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: password
+
+  # varnish:
+  #   image: jonbaldie/varnish
+  #   links:
+  #     - nginx:backend-host
+  #   volumes:
+  #     - ./varnish/default.vcl:/etc/varnish/default.vcl
+  #   ports:
+  #     - "80:80"
+  #   restart: unless-stopped
